@@ -128,6 +128,8 @@ public class Table
      * Check whether the original key is included in the projection.
      *
      * #usage movie.project ("title year studioNo")
+     * 
+     * @author Justin Cook
      *
      * @param attributes  the attributes to project onto
      * @return  a table of projected tuples
@@ -141,7 +143,10 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        for (Comparable[] tuple : tuples ) {
+            Comparable[] row = extract(tuple, newKey);
+        	rows.add(row);
+        }
 
         return new Table (name + count++, attrs, colDomain, newKey, rows);
     } // project
@@ -387,15 +392,22 @@ public class Table
      */
     public void save ()
     {
+    	File saveFile = new File(DIR + name + EXT);
+    	
         try {
+        	saveFile.getParentFile().mkdir();
+        	saveFile.createNewFile(); //creates file if it doesn't exist yet
+        	
             ObjectOutputStream oos = new ObjectOutputStream (new FileOutputStream (DIR + name + EXT));
             oos.writeObject (this);
             oos.close ();
         } catch (IOException ex) {
             out.println ("save: IO Exception");
             ex.printStackTrace ();
-        } // try
+        }  
+          
     } // save
+
 
     //----------------------------------------------------------------------------------
     // Private Methods
@@ -474,8 +486,18 @@ public class Table
      */
     private boolean typeCheck (Comparable [] t)
     { 
-        //  T O   B E   I M P L E M E N T E D 
-
+        if (t.length != this.domain.length) { 
+        	out.println ("typeCheck Error: size of tuple is not equal to the size of the domain. ");
+        	return false;
+        }
+        
+        for (int i = 0; i < t.length; i++) {
+        	if (t[i].getClass() != this.domain[i]) {
+        		out.println ("typeCheck Error: value type does not match domain.");
+        		return false;
+        	}
+        }
+        
         return true;
     } // typeCheck
 
